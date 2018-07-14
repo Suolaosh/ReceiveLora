@@ -65,9 +65,9 @@ public class sx1276 extends Thread {
 	public static int REG_FRF_MID          			= 0x07;
 	public static int REG_FRF_LSB          			= 0x08;
 
-	public static int FRF_MSB              			= 0xD9; // 868.1 Mhz
-	public static int FRF_MID              			= 0x06;
-	public static int FRF_LSB              			= 0x66;
+	public static int FRF_MSB              			= 0x6C; //433.5 Mhz
+	public static int FRF_MID              			= 0x60;
+	public static int FRF_LSB              			= 0x00;
 	
 	// LOW NOISE AMPLIFIER
 	public static int REG_LNA                     	= 0x0C;
@@ -98,6 +98,7 @@ public class sx1276 extends Thread {
 	}
 	
 	public sx1276(sx1276_callback _callback, GpioController _gpio, String _DeviceAddress){
+		System.out.println("begin init");
 		gpio = _gpio;
 		callback = _callback;
 		DeviceAddress = _DeviceAddress;
@@ -131,6 +132,9 @@ public class sx1276 extends Thread {
 			writeSPI(REG_IRQ_FLAGS, 0x20);
 			return null;
 		}
+		int version = readSPI(REG_VERSION);
+		System.out.println("0x42:"+version);
+		
 		int currentAddr = readSPI(REG_FIFO_RX_CURRENT_ADDR);
 		int receivedCount = readSPI(REG_RX_NB_BYTES);
 		writeSPI(REG_FIFO_ADDR_PTR,currentAddr);
@@ -204,6 +208,7 @@ public class sx1276 extends Thread {
 	}
 	
 	private void ReceiveMessagePacket(){
+		
 		if (LastSend){
 			LastSend = false;
 			writeSPI(REG_OPMODE, SX7X_MODE_RX_CONTINUOS);
@@ -246,7 +251,7 @@ public class sx1276 extends Thread {
 		JsonUpRxpk us = new JsonUpRxpk();
 		rxpk rx= new rxpk();
 		rx.tmst = dt.getSecondOfDay()*10000;
-		rx.freq = 868.1;
+		rx.freq = 433.5;
 		rx.chan = 0;
 		rx.rfch = 0;
 		rx.stat = 1;
@@ -272,6 +277,7 @@ public class sx1276 extends Thread {
 		RstPin.high();
 		sleep(100);
 		int version = readSPI(REG_VERSION);
+		System.out.println("0x42:"+version);
 		if (version == 0x12){
 			System.out.println("SX1276 detected, starting");
 		} else {
@@ -343,7 +349,7 @@ public class sx1276 extends Thread {
 				public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent arg0) {
 					if (arg0.getEdge() == PinEdge.RISING){
 						System.out.println("ReceiveMessage");
-						Logger.info("ReceiveMessage");
+//						Logger.info("ReceiveMessage");
 						ReceiveMessagePacket();
 					}
 				}
