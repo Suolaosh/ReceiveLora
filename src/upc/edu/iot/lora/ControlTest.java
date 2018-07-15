@@ -45,7 +45,7 @@ public class ControlTest extends Thread implements UDPCommCallback  , BusMCCallb
 //		MCTask.SendMCID("TEST");
 //		GateWayMac = _GateWayMac;
 //		GateWayAddress = _GateWayAddress;
-		sxdevice = new sx1276(this,gpio,"ff");
+		sxdevice = new sx1276(this,gpio);
 		this.start();
 	}
 

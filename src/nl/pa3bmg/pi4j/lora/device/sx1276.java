@@ -217,6 +217,8 @@ public class sx1276 extends Thread {
 			if (DIOPin.isHigh()){
 				byte[] message = GetMessage();
 				if (message!=null){
+
+					System.out.println("Message(ASCII) = "+ convertHexToString(ByteUtils.toHexString(message)) + " length = "+message.length);
 					System.out.println("Message = "+ ByteUtils.toHexString(message) + " length = "+message.length);
 					SnifModel sm = ProcessMessage(message);
 					System.out.println(sm);
@@ -364,5 +366,26 @@ public class sx1276 extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
-}
+	public String convertHexToString(String hex){
+		 
+		  StringBuilder sb = new StringBuilder();
+		  StringBuilder temp = new StringBuilder();
+
+		  //49204c6f7665204a617661 split into two characters 49, 20, 4c...
+		  for( int i=0; i<hex.length()-1; i+=2 ){
+
+		      //grab the hex in pairs
+		      String output = hex.substring(i, (i + 2));
+		      //convert hex to decimal
+		      int decimal = Integer.parseInt(output, 16);
+		      //convert the decimal to character
+		      sb.append((char)decimal);
+
+		      temp.append(decimal);
+		  }
+		  return sb.toString();
+	}
+	}
+
+
+
