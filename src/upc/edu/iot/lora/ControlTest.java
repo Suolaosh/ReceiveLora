@@ -18,6 +18,7 @@ import nl.pa3bmg.pi4j.lora.multicast.BusMCTask;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.bouncycastle.util.encoders.Hex;
 import org.pmw.tinylog.Logger;
 
@@ -46,7 +47,10 @@ public class ControlTest extends Thread implements UDPCommCallback  , BusMCCallb
 //		GateWayMac = _GateWayMac;
 //		GateWayAddress = _GateWayAddress;
 		sxdevice = new sx1276(this,gpio);
+
+	 
 		this.start();
+
 	}
 
 	public static void main(String[] args) {
@@ -57,6 +61,8 @@ public class ControlTest extends Thread implements UDPCommCallback  , BusMCCallb
 		} else {
 			new ControlTest("abcdefffff0123456","router.eu.thethings.network");
 		}
+
+
 	}
 	
 //	public void SendStatusMessage(){
@@ -108,7 +114,7 @@ public class ControlTest extends Thread implements UDPCommCallback  , BusMCCallb
 
 	@Override
 	public void Receive(SnifModel data) {
-		//System.out.println("ReceiveMC SnifModel 0x"+ Integer.toHexString(data.address));
+		System.out.println("ReceiveMC SnifModel 0x"+ Integer.toHexString(data.address));
 	}
 
 	@Override
@@ -128,10 +134,13 @@ public class ControlTest extends Thread implements UDPCommCallback  , BusMCCallb
 
 	@Override
 	public void MessageReceiveed(SnifModel snifmodel) {
-		System.out.println("MessageReceiveed snifmodel="+snifmodel.address);
+		System.out.println("MessageReceiveed snifmodel.address="+snifmodel.address);
+
+		System.out.println("MessageReceiveed snifmodel.header="+snifmodel.header);
+		System.out.println("MessageReceiveed snifmodel.bdata="+snifmodel.bdata);
 //		System.out.println(MCTask);
 //		MCTask.SendMCID(snifmodel);
-//		System.out.println("@@");
+		System.out.println("@@");
 //		JsonUpRxpk us = new JsonUpRxpk();
 //		us.rxpks.add(snifmodel.rXpk);
 //		String json = gs.toJsonTree(us).toString();

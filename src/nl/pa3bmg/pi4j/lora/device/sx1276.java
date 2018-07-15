@@ -2,6 +2,8 @@ package nl.pa3bmg.pi4j.lora.device;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.bouncycastle.util.encoders.Base64;
@@ -111,6 +113,7 @@ public class sx1276 extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		SendArduino();
 	}
 	
 	public void run(){
@@ -157,6 +160,7 @@ public class sx1276 extends Thread {
 		writeSPI(REG_PAYLOAD_LENGTH,message.length);
 		writeSPI(REG_OPMODE, SX7X_MODE_TX);
 		writeSPI(REG_DIO_MAPPING_1,0x40);
+		System.out.println("send success!");
 	}
 	
 	private void selectSPI(){
@@ -208,7 +212,6 @@ public class sx1276 extends Thread {
 	}
 	
 	private void ReceiveMessagePacket(){
-		
 		if (LastSend){
 			LastSend = false;
 			writeSPI(REG_OPMODE, SX7X_MODE_RX_CONTINUOS);
@@ -217,7 +220,6 @@ public class sx1276 extends Thread {
 			if (DIOPin.isHigh()){
 				byte[] message = GetMessage();
 				if (message!=null){
-
 					System.out.println("Message(ASCII) = "+ convertHexToString(ByteUtils.toHexString(message)) + " length = "+message.length);
 					System.out.println("Message = "+ ByteUtils.toHexString(message) + " length = "+message.length);
 					SnifModel sm = ProcessMessage(message);
@@ -241,11 +243,12 @@ public class sx1276 extends Thread {
 		if (message[7]<0) B = 256 + message[7];
 		int sequence = 256*B+A;
 		// Get the adress
-		byte[] addrbytes = Arrays.copyOfRange(message, 1, 5);
-		int address = java.nio.ByteBuffer.wrap(addrbytes).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+		byte[] addrbytes = Arrays.copyOfRange(message,0,5);//??????????????????????
+		int address = java.nio.ByteBuffer.wrap(addrbytes).order(java.nio.ByteOrder.BIG_ENDIAN).getInt();
 		String addr = Integer.toHexString(address).toUpperCase();
-		byte[] header = new byte[9];
-		for (int i = 0; i < 9 ; i++){
+		System.out.println("MessageReceiveed snifmodel.addr="+addr);
+		byte[] header = new byte[2];
+		for (int i = 0; i < 2 ; i++){
 			header[i] = message[i];
 		}
 		String BaseData = new String(Base64.encode(message));
@@ -327,6 +330,32 @@ public class sx1276 extends Thread {
 		writeSPI(sx1276.REG_OPMODE, SX7X_MODE_SLEEP);
 	}
 	
+	public void SendArduino() {
+		final long timeInterval = 5000;// 1s运行一次
+		Runnable runnable = new Runnable() {
+			public void run() {
+				while (true) {
+					// ------- code for task to run
+//你要运行的程序
+					String Str="Hello dbd!";
+					SendMessage(Str);
+					// ------- ends here
+					try {
+						Thread.sleep(timeInterval);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		Thread thread = new Thread(runnable);
+		thread.start();
+	}
+	public void SendMessage(String Mssssss){
+		byte[] mss = Mssssss.getBytes();
+		SendMessagePacket(mss);
+	}
+
 	private boolean SetupKeys(){
 		if (keyS.LoadKeysFromFile(DeviceAddress)){
 			int da = Integer.parseInt(keyS.getDeviceAddress(), 16);
@@ -337,6 +366,7 @@ public class sx1276 extends Thread {
 	}
 	
 	private void InitStuff(){
+//		final String s1;
 		System.out.println("InitStuff");
 		try {
 			//SpiDevice.DEFAULT_SPI_SPEED
@@ -351,8 +381,8 @@ public class sx1276 extends Thread {
 				public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent arg0) {
 					if (arg0.getEdge() == PinEdge.RISING){
 						System.out.println("ReceiveMessage");
-//						Logger.info("ReceiveMessage");
-						ReceiveMessagePacket();
+						Logger.info("ReceiveMessage");
+						ReceiveMessagePacket();					
 					}
 				}
 			});
@@ -388,4 +418,4 @@ public class sx1276 extends Thread {
 	}
 
 
-0
+
